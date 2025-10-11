@@ -1,5 +1,6 @@
 import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
 import connectToDB from "@/lib/dbConnect";
+import { sendResponse } from "@/lib/SendResponse";
 import { UserModel } from "@/models/User";
 import bcrypt from "bcryptjs";
 
@@ -14,15 +15,7 @@ export async function POST(request: Request) {
     });
 
     if (existingUserByUsername) {
-      return Response.json(
-        {
-          success: false,
-          message: "Username already taken.",
-        },
-        {
-          status: 400,
-        }
-      );
+      return sendResponse("Username already taken", false, 400);
     }
 
     const existingUserByEmail = await UserModel.findOne({
@@ -33,14 +26,10 @@ export async function POST(request: Request) {
 
     if (existingUserByEmail) {
       if (existingUserByEmail.isVerified) {
-        return Response.json(
-          {
-            success: false,
-            message: "Email already registered and verified.",
-          },
-          {
-            status: 400,
-          }
+        return sendResponse(
+          "Email already registered and verified.",
+          false,
+          400
         );
       } else {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -75,36 +64,16 @@ export async function POST(request: Request) {
     );
 
     if (!emailResponse.success) {
-      return Response.json(
-        {
-          success: false,
-          message: emailResponse.message,
-        },
-        {
-          status: 500,
-        }
-      );
+      return sendResponse(emailResponse.message, false, 500);
     }
 
-    return Response.json(
-      {
-        success: true,
-        message: "User registered successfully. Verification email sent.",
-      },
-      {
-        status: 201,
-      }
+    return sendResponse(
+      "User registered successfully. Verification email sent.",
+      true,
+      201
     );
   } catch (error) {
     console.error("Error registering user:", error);
-    return Response.json(
-      {
-        success: false,
-        message: "Error registering user.",
-      },
-      {
-        status: 500,
-      }
-    );
+    return sendResponse("Something went wrong", false, 500);
   }
 }

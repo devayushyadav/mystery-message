@@ -2,7 +2,11 @@
 export const sendResponse = (
   message: string,
   success: boolean,
-  status: number
+  status: number,
+  data?: object
 ) => {
-  return Response.json({ success, message }, { status });
+  return new Response(JSON.stringify({ success, data, message }), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 };
