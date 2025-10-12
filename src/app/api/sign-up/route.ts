@@ -9,13 +9,16 @@ export async function POST(request: Request) {
 
   try {
     const { username, email, password } = await request.json();
-    const existingUserByUsername = await UserModel.findOne({
-      username,
-      isVerified: true,
-    });
+
+    const existingUserByUsername = await UserModel.findOne({ username });
 
     if (existingUserByUsername) {
-      return sendResponse("Username already taken", false, 400);
+      if (existingUserByUsername.isVerified) {
+        return sendResponse("Username already taken", false, 400);
+      } else {
+        // Remove stale unverified user with same username
+        await UserModel.deleteOne({ _id: existingUserByUsername._id });
+      }
     }
 
     const existingUserByEmail = await UserModel.findOne({

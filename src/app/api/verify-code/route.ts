@@ -15,6 +15,8 @@ export async function POST(request: Request) {
     // Parse request body
     const { username, code } = await request.json();
 
+    console.log(username, code);
+
     // Find user by username
     const user = await UserModel.findOne({ username });
 
