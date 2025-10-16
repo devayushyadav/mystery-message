@@ -21,10 +21,10 @@ export async function GET(request: Request) {
     const userID = new mongoose.Types.ObjectId(loggedInuser._id);
 
     const user = await UserModel.aggregate([
-      { $match: { $id: userID } },
-      { $unwind: "$messages" },
-      { $sort: { "$messages.createdAt": -1 } },
-      { $group: { _id: "$_id", messages: { $push: "$messages" } } },
+      { $match: { _id: userID } }, // Corrected the field path to '_id'
+      { $unwind: "$messages" }, // Unwind the 'messages' array
+      { $sort: { "messages.createdAt": -1 } }, // Sort by 'createdAt' within messages
+      { $group: { _id: "$_id", messages: { $push: "$messages" } } }, // Group by user _id
     ]);
 
     if (!user || user.length === 0) {
